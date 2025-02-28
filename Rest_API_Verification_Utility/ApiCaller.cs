@@ -1,14 +1,16 @@
 using System.Text;
+using System.Net;
 
 public class ApiCaller
 {
-    public async Task<string> CallApi(string apiType, string url, string jsonData = null)
+    public async Task<HttpResponseMessage> CallApi(string apiType, string url, string jsonData = null)
     {
+
+        HttpResponseMessage response = null;
         try
         {
             using (var client = new HttpClient())
             {
-                HttpResponseMessage response = null;
                 var api_type = apiType.ToUpper();
 
                 if (api_type == "POST" || api_type == "PUT" || api_type == "PATCH")
@@ -37,25 +39,27 @@ public class ApiCaller
                 {
                     response = await client.DeleteAsync(url);
                 }
-                else
-                {
-                    return "Invalid API Type";
-                }
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadAsStringAsync();
-                }
-                else
-                {
-                    return "API Failed" + " API_Type:" + api_type + " Endpoint:" + url + " ResponseCode:" + response.StatusCode;
-                }
-                
+                return response;
             }
+        }
+        catch (HttpRequestException e)
+        {
+            response = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                ReasonPhrase = e.Message
+            };
+            return response;
         }
         catch (Exception ex)
         {
-            return "API Failed" + " API_Type:" + apiType + " Endpoint:" + url + " Exception:" + ex.Message;
+            response = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                ReasonPhrase = ex.Message
+            };
+            return response;
         }
     }
 }
