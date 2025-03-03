@@ -2,54 +2,9 @@ using OfficeOpenXml;
 
 public class DotnetAPICheck
 {
-
-    private string _assignment_type;
-    private ExcelPackage _package;
-    private ExcelWorksheet _worksheet;
-    private string _filePath;
-
-    public DotnetAPICheck(string assignment_type)
-    {
-        _assignment_type = assignment_type;
-        InitializeSheetsService();
-    }
-
-    private void InitializeSheetsService() 
-    {
-
-        // Define the file path
-        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data.xlsx");
-
-        // Create new Excel package
-        _package = new ExcelPackage();
-
-        // Add a new worksheet
-        _worksheet = _package.Workbook.Worksheets.Add("Sheet1");
-
-        // Add headers
-        _worksheet.Cells[1, 1].Value = "Assignment Type";
-        _worksheet.Cells[1, 2].Value = "Globant Email";
-        _worksheet.Cells[1, 3].Value = "Execution Date";
-        _worksheet.Cells[1, 4].Value = "Endpoint";
-        _worksheet.Cells[1, 5].Value = "Http Verb";
-        _worksheet.Cells[1, 6].Value = "Request Payload";
-        _worksheet.Cells[1, 7].Value = "Response";
-        _worksheet.Cells[1, 8].Value = "Response Code";
-        _worksheet.Cells[1, 9].Value = "Message";
-
-        // Set the same value in the specified range
-        _worksheet.Cells[$"A2:A7"].Value = _assignment_type;
-        _worksheet.Cells[$"C2:C7"].Value = DateTime.Now.ToString("yyyy-MM-dd");
-
-    }
-
-    public async Task DotnetAPIVerification()
+    public async Task DotnetAPIVerification(string baseURL, string filePath, ExcelPackage package, ExcelWorksheet worksheet)
     {
         HttpResponseMessage response = null;
-
-        Console.WriteLine("\nEnter Base URL:");
-        string baseURL = Console.ReadLine();        // http://localhost:5097/ - Sample URL
-        //string baseURL = "http://localhost:5097/";
 
         int ProductId = 0;
         int ModifiedBy = 2;
@@ -75,7 +30,7 @@ public class DotnetAPICheck
         Console.WriteLine("Endpoint: Post " + baseURL + "api/products");
         response = await apiCaller.CallApi("Post", baseURL + "api/products", jsonData);
         
-        ProductId = await updateExcel.UpdateResponseToExcel(_worksheet, response, "Post", baseURL + "api/products", 1, jsonData);
+        ProductId = await updateExcel.UpdateResponseToExcel(worksheet, response, "Post", baseURL + "api/products", 1, jsonData);
 
         Console.WriteLine("\n");
 
@@ -83,7 +38,7 @@ public class DotnetAPICheck
         Console.WriteLine("Endpoint: Get " + baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy);
         response = await apiCaller.CallApi("Get", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy);
 
-        await updateExcel.UpdateResponseToExcel(_worksheet, response, "Get", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy, 2);
+        await updateExcel.UpdateResponseToExcel(worksheet, response, "Get", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy, 2);
 
         Console.WriteLine("\n");
 
@@ -91,7 +46,7 @@ public class DotnetAPICheck
         Console.WriteLine("Endpoint: Get " + baseURL + "api/products/?modifiedBy=" + ModifiedBy);
         response = await apiCaller.CallApi("Get", baseURL + "api/products/?modifiedBy=" + ModifiedBy);
 
-        await updateExcel.UpdateResponseToExcel(_worksheet, response, "Get", baseURL + "api/products/?modifiedBy=" + ModifiedBy, 3);
+        await updateExcel.UpdateResponseToExcel(worksheet, response, "Get", baseURL + "api/products/?modifiedBy=" + ModifiedBy, 3);
       
         Console.WriteLine("\n");
        
@@ -113,7 +68,7 @@ public class DotnetAPICheck
         jsonData = System.Text.Json.JsonSerializer.Serialize(putData);
         response = await apiCaller.CallApi("Put", baseURL + "api/products/" + ProductId, jsonData);
 
-        await updateExcel.UpdateResponseToExcel(_worksheet, response, "Put", baseURL + "api/products/" + ProductId, 4, jsonData);
+        await updateExcel.UpdateResponseToExcel(worksheet, response, "Put", baseURL + "api/products/" + ProductId, 4, jsonData);
 
         Console.WriteLine("\n");
 
@@ -140,7 +95,7 @@ public class DotnetAPICheck
 
         response = await apiCaller.CallApi("Patch", baseURL + "api/products/" + ProductId, jsonData);
 
-        await updateExcel.UpdateResponseToExcel(_worksheet, response, "Patch", baseURL + "api/products/" + ProductId, 5, jsonData);
+        await updateExcel.UpdateResponseToExcel(worksheet, response, "Patch", baseURL + "api/products/" + ProductId, 5, jsonData);
 
         Console.WriteLine("\n");
 
@@ -148,14 +103,14 @@ public class DotnetAPICheck
         Console.WriteLine("Endpoint: Delete " + baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy);
         response = await apiCaller.CallApi("Delete", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy);
 
-        await updateExcel.UpdateResponseToExcel(_worksheet, response, "Delete", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy, 6);
+        await updateExcel.UpdateResponseToExcel(worksheet, response, "Delete", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy, 6);
         
         Console.WriteLine("\nAll the API Endpoints are verified, Please check the results in Excel file!\n");
 
         await Task.Run(() => 
         {
             // Save the package
-            _package.SaveAs(new FileInfo(_filePath));
+            package.SaveAs(new FileInfo(filePath));
         });
     }
 }
