@@ -34,9 +34,11 @@ class Program
         worksheet.Cells[$"A2:A7"].Value = assignment_type;
         worksheet.Cells[$"C2:C7"].Value = DateTime.Now.ToString("yyyy-MM-dd");
 
+        Console.WriteLine("\nAPI Check Utility\n");
+
         //Get the base URL of backend server from user
-        Console.WriteLine("\nEnter Base URL:");
-        string baseURL = Console.ReadLine();        // http://localhost:5097/ - Sample URL
+        Console.WriteLine("Enter Base URL: (http://localhost:5097/ - It should be in this format)");
+        string baseURL = Console.ReadLine();
 
         //DotNet Assignment API Verification
         DotnetAPICheck dotnetAPICheck = new DotnetAPICheck();
