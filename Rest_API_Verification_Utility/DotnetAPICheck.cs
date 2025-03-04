@@ -9,10 +9,10 @@ public class DotnetAPICheck
         int ProductId = 0;
         int ModifiedBy = 2;
 
-        Console.WriteLine("\nAPI Check Utility\n");
-
         ApiCaller apiCaller = new ApiCaller();
         UpdateExcel updateExcel = new UpdateExcel();
+
+        Console.WriteLine("\n");
 
         //POST API call
         var postData = new { 
@@ -105,12 +105,22 @@ public class DotnetAPICheck
 
         await updateExcel.UpdateResponseToExcel(worksheet, response, "Delete", baseURL + "api/products/" + ProductId + "?modifiedBy=" + ModifiedBy, 6);
         
-        Console.WriteLine("\nAll the API Endpoints are verified, Please check the results in Excel file!\n");
-
         await Task.Run(() => 
         {
-            // Save the package
-            package.SaveAs(new FileInfo(filePath));
+            try
+            {
+                // Save the package
+                package.SaveAs(new FileInfo(filePath));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("\nError while saving the data in Excel file. Technical Error: " + ex.Message);
+                throw;
+            }
+            
+            Console.WriteLine("\nExcel file created and data added successfully!");
         });
+
+        Console.WriteLine("\nAll the API Endpoints are verified, Please check the results in Excel file!\n");
     }
 }
