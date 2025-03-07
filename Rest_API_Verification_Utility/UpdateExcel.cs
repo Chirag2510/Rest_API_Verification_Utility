@@ -32,12 +32,11 @@ public class UpdateExcel
                     // Remove extra comma from end
                     productIds = productIds.Substring(0, productIds.Length - 2);
 
-                } 
+                }
                 else
                 {
-                    // Access ProductID and ProductName directly
+                    // Access ProductID directly
                     productId = root.GetProperty("productId").GetInt32();
-                    var productName = root.GetProperty("productName");
                 }
                 
                 message =  api_type + " API Endpoint is verified successfully.";
@@ -49,7 +48,7 @@ public class UpdateExcel
 
                 if (api_type == "GET" && productIds != "") 
                 {
-                    message += "\nProducts with ProductID: " +productIds+ " are retrieved.";
+                    message += "\nProducts with ProductID: " +productIds+ " is/are retrieved.";
                 } 
                 else if (api_type == "GET") 
                 {
