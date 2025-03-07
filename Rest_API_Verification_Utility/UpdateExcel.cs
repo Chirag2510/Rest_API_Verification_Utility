@@ -8,21 +8,10 @@ public class UpdateExcel
     {
         var api_type = apiType.ToUpper();
         int productId = 0;
-
-        var userEmail = "";
-        if (response.Headers.TryGetValues("X-User-Email", out var emailValues))
-        {
-            userEmail = emailValues.FirstOrDefault();
-            Console.WriteLine("X-User-Email: " + userEmail);
-        }
-        else
-        {
-            Console.WriteLine("Not getting the email");
-        }
-
         var responseData = "";
         var message = "";
         var productIds = "";
+
         if (response.IsSuccessStatusCode)
         {
             responseData = await response.Content.ReadAsStringAsync();
@@ -43,12 +32,11 @@ public class UpdateExcel
                     // Remove extra comma from end
                     productIds = productIds.Substring(0, productIds.Length - 2);
 
-                } 
+                }
                 else
                 {
-                    // Access ProductID and ProductName directly
+                    // Access ProductID directly
                     productId = root.GetProperty("productId").GetInt32();
-                    var productName = root.GetProperty("productName");
                 }
                 
                 message =  api_type + " API Endpoint is verified successfully.";
@@ -60,7 +48,7 @@ public class UpdateExcel
 
                 if (api_type == "GET" && productIds != "") 
                 {
-                    message += "\nProducts with ProductID: " +productIds+ " are retrieved.";
+                    message += "\nProducts with ProductID: " +productIds+ " is/are retrieved.";
                 } 
                 else if (api_type == "GET") 
                 {
@@ -83,9 +71,22 @@ public class UpdateExcel
             message += "\nTechnical Error: " + response.ReasonPhrase; 
         }
 
+        Console.WriteLine(message);
+
+        var userEmail = "";
+        if (response.Headers.TryGetValues("X-User-Email", out var emailValues))
+        {
+            userEmail = emailValues.FirstOrDefault();
+        }
+        else
+        {
+            Console.WriteLine("Email Not Found. Make sure you have added 'X-User-Email' in API response header.");
+            userEmail = "Email Not Found. Make sure you have added 'X-User-Email' in API response header.";
+        }
+
         row_number = row_number + 1;
-        
-        await Task.Run( () => 
+
+        await Task.Run(() => 
         {
             worksheet.Cells[row_number, 2].Value = userEmail;
             worksheet.Cells[row_number, 4].Value = url;
@@ -96,8 +97,6 @@ public class UpdateExcel
             worksheet.Cells[row_number, 9].Value = message;
         });
     
-        Console.WriteLine("Excel file created and data added successfully!");
-
         return productId;
     }
 }
